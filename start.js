@@ -92,7 +92,9 @@ main().catch(e => log(`Encountered error: ${e}`));
 
 
 async function restart() {
+  log("Running npm install...");
   await exec("npm install", { cwd: __dirname });
+  log("Setting up exit listener...");
   setTimeout(() => {
     process.on("exit", () => {
       childProcess.spawn(process.argv.shift(), process.argv, {
