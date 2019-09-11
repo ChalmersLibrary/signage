@@ -47,47 +47,49 @@ async function main() {
     await fsPromises.writeFile("tmp/state.json", JSON.stringify(state));
     log("Got new software. Restarting...");
     await restart();
-  }
-
-  // Get the mac address.
-  let mac;
-  let networkInterfaces = os.networkInterfaces();
-  if (networkInterfaces["eth0"]) {
-    let networkInterface = networkInterfaces["eth0"];
-    let macs = networkInterface
-      .filter(x => x.family.toLowerCase() === "ipv4")
-      .map(x => x.mac);
-    if (macs.length >= 1) {
-      mac = macs[0];
-      if (macs.length > 1) {
-        log("Something is very wrong. Got multiple ipv4 mac addresses.");
+  } else {
+    // Get the mac address.
+    let mac;
+    let networkInterfaces = os.networkInterfaces();
+    if (networkInterfaces["eth0"]) {
+      let networkInterface = networkInterfaces["eth0"];
+      let macs = networkInterface
+        .filter(x => x.family.toLowerCase() === "ipv4")
+        .map(x => x.mac);
+      if (macs.length >= 1) {
+        mac = macs[0];
+        if (macs.length > 1) {
+          log("Something is very wrong. Got multiple ipv4 mac addresses.");
+        }
+      } else {
+        log("Couldn't find mac address.");
       }
     } else {
-      log("Couldn't find mac address.");
+      log("Couldn't find eth0.");
     }
-  } else {
-    log("Couldn't find eth0.");
-  }
 
-  // Check for new configurations.
-  await gitPull(`${__dirname}/../config/`);
-  let latestConfigGitHash = await getLatestHash(`${__dirname}/../config/`);
-  if (state.configGitHash !== latestConfigGitHash) {
-    state.configGitHash = latestConfigGitHash;
-    await fsPromises.writeFile("tmp/state.json", JSON.stringify(state));
-  }
+    // Check for new configurations.
+    await gitPull(`${__dirname}/../config/`);
+    let latestConfigGitHash = await getLatestHash(`${__dirname}/../config/`);
+    if (state.configGitHash !== latestConfigGitHash) {
+      state.configGitHash = latestConfigGitHash;
+      await fsPromises.writeFile("tmp/state.json", JSON.stringify(state));
+    }
 
-  // Parse current configuration and start application.
-  let sourceConfig = JSON.parse(await fsPromises.readFile("../config/cls.json", "utf-8"));
-  if (mac) {
-    let config = sourceConfig[mac];
-    if (config.mode === "browser") {
-      let electronPath = "node_modules/electron/dist/electron";
-      if (config.orientation === "portrait") {
-        exec(`startx ${electronPath} browser.js ${config.url} -- -config /etc/X11/rpi.conf`, 
-          { cwd: __dirname });
-      } else {
-        exec(`startx ${electronPath} browser.js ${config.url}`, { cwd: __dirname });
+    // Parse current configuration and start application.
+    let sourceConfig = JSON.parse(await fsPromises.readFile("../config/cls.json", "utf-8"));
+    if (mac) {
+      let config = sourceConfig[mac];
+      if (config.mode === "browser") {
+        let electronPath = `${__dirname}/node_modules/electron/dist/electron`;
+        let browserjsPath = `${__dirname}/browser.js`;
+        let portraitArguments = "-- -config /etc/X11/rpi.conf";
+        if (config.orientation === "portrait") {
+          exec(`startx ${electronPath} ${browserjsPath} ${config.url} ${portraitArguments}`, 
+            { cwd: __dirname });
+        } else {
+          exec(`startx ${electronPath} ${browserjsPath} ${config.url}`, { cwd: __dirname });
+        }
       }
     }
   }
