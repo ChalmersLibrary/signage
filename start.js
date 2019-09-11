@@ -15,26 +15,6 @@ const exec = util.promisify(childProcess.exec);
  */
 
 async function main() {
-  // Get the mac address.
-  let mac;
-  let networkInterfaces = os.networkInterfaces();
-  if (networkInterfaces["eth0"]) {
-    let networkInterface = networkInterfaces["eth0"];
-    let macs = networkInterface
-      .filter(x => x.family.toLowerCase() === "ipv4")
-      .map(x => x.mac);
-    if (macs.length >= 1) {
-      mac = macs[0];
-      if (macs.length > 1) {
-        log("Something is very wrong. Got multiple ipv4 mac addresses.");
-      }
-    } else {
-      log("Couldn't find mac address.");
-    }
-  } else {
-    log("Couldn't find eth0.");
-  }
-
   // Make sure needed folders and stuff exists.
   try {
     await fsPromises.mkdir("tmp");
@@ -67,6 +47,26 @@ async function main() {
     await fsPromises.writeFile("tmp/state.json", JSON.stringify(state));
     log("Got new software. Restarting...");
     await restart();
+  }
+
+  // Get the mac address.
+  let mac;
+  let networkInterfaces = os.networkInterfaces();
+  if (networkInterfaces["eth0"]) {
+    let networkInterface = networkInterfaces["eth0"];
+    let macs = networkInterface
+      .filter(x => x.family.toLowerCase() === "ipv4")
+      .map(x => x.mac);
+    if (macs.length >= 1) {
+      mac = macs[0];
+      if (macs.length > 1) {
+        log("Something is very wrong. Got multiple ipv4 mac addresses.");
+      }
+    } else {
+      log("Couldn't find mac address.");
+    }
+  } else {
+    log("Couldn't find eth0.");
   }
 
   // Check for new configurations.
