@@ -82,7 +82,13 @@ async function main() {
   if (mac) {
     let config = sourceConfig[mac];
     if (config.mode === "browser") {
-      exec(`npm run browser ${sourceConfig.url}`, { cwd: __dirname });
+      let electronPath = "node_modules/electron/dist/electron";
+      if (config.orientation === "portrait") {
+        exec(`startx ${electronPath} browser.js ${config.url} -- -config /etc/X11/rpi.conf`, 
+          { cwd: __dirname });
+      } else {
+        exec(`startx ${electronPath} browser.js ${config.url}`, { cwd: __dirname });
+      }
     }
   }
 }

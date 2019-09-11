@@ -3,8 +3,7 @@
   "version": "0.0.1",
   "description": "Use and manage multiple Raspberry PI's as a simple signage system.",
   "scripts": {
-    "start": "node start.js",
-    "browser": "electron browser.js"
+    "start": "node start.js"
   },
   "repository": {
     "type": "git",
