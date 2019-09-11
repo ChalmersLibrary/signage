@@ -6,8 +6,8 @@ if (process.argv.length > 2) {
   const height = process.argv[4];
   function createWindow() {
     let win = new BrowserWindow({
-      width: width || 800,
-      height: height || 600,
+      width: parseInt(width) || 800,
+      height: parseInt(height) || 600,
       webPreferences: {
         nodeIntegration: true
       },
