@@ -1,0 +1,19 @@
+{
+  "name": "signage",
+  "version": "0.0.1",
+  "description": "Use and manage multiple Raspberry PI's as a simple signage system.",
+  "scripts": {
+    "start": "node start.js",
+    "browser": "electron browser.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ChalmersLibrary/signage.git"
+  },
+  "private": true,
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "electron": "^6.0.8"
+  }
+}

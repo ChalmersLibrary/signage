@@ -1,5 +1,6 @@
 #!/bin/node
 
+const os = require("os");
 const fs = require("fs");
 const fsPromises = require("fs").promises;
 const util = require("util");
@@ -14,6 +15,26 @@ const exec = util.promisify(childProcess.exec);
  */
 
 async function main() {
+  // Get the mac address.
+  let mac;
+  let networkInterfaces = os.networkInterfaces();
+  if (networkInterfaces["eth0"]) {
+    let networkInterface = networkInterfaces["eth0"];
+    let macs = networkInterface
+      .filter(x => x.family.toLowerCase() === "ipv4")
+      .where(x => x.mac);
+    if (macs.length >= 1) {
+      mac = macs[0];
+      if (macs.length > 1) {
+        log("Something is very wrong. Got multiple ipv4 mac addresses.");
+      }
+    } else {
+      log("Couldn't find mac address.");
+    }
+  } else {
+    log("Couldn't find eth0.");
+  }
+
   // Make sure needed folders and stuff exists.
   try {
     await fsPromises.mkdir("tmp");
@@ -45,22 +66,33 @@ async function main() {
     state.softwareGitHash = latestSoftwareGitHash;
     await fsPromises.writeFile("tmp/state.json", JSON.stringify(state));
     log("Got new software. Restarting...");
-    restart();
+    await restart();
   }
 
   // Check for new configurations.
   await gitPull(`${__dirname}/../config/`);
+  let latestConfigGitHash = await getLatestHash(`${__dirname}/../config/`);
+  if (state.configGitHash !== latestConfigGitHash) {
+    state.configGitHash = latestConfigGitHash;
+    await fsPromises.writeFile("tmp/state.json", JSON.stringify(state));
+  }
 
   // Parse current configuration and start application.
   let sourceConfig = await fsPromises.readFile("../config/cls.json", "utf-8");
-
+  if (mac) {
+    let config = sourceConfig[mac];
+    if (config.mode === "browser") {
+      exec(`npm run browser ${sourceConfig.url}`, { cwd: __dirname });
+    }
+  }
 }
 
 main().catch(e => log(`Encountered error: ${e}`));
 
 
 
-function restart() {
+async function restart() {
+  await exec("npm install", { cwd: __dirname });
   setTimeout(() => {
     process.on("exit", () => {
       childProcess.spawn(process.argv.shift(), process.argv, {
