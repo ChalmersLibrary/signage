@@ -22,7 +22,7 @@ async function main() {
     let networkInterface = networkInterfaces["eth0"];
     let macs = networkInterface
       .filter(x => x.family.toLowerCase() === "ipv4")
-      .where(x => x.mac);
+      .map(x => x.mac);
     if (macs.length >= 1) {
       mac = macs[0];
       if (macs.length > 1) {
@@ -78,7 +78,7 @@ async function main() {
   }
 
   // Parse current configuration and start application.
-  let sourceConfig = await fsPromises.readFile("../config/cls.json", "utf-8");
+  let sourceConfig = JSON.parse(await fsPromises.readFile("../config/cls.json", "utf-8"));
   if (mac) {
     let config = sourceConfig[mac];
     if (config.mode === "browser") {
