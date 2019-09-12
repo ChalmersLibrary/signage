@@ -85,10 +85,21 @@ async function main() {
         let browserjsPath = `${__dirname}/browser.js`;
         let portraitArguments = "-- -config /etc/X11/rpi.conf";
         if (config.orientation === "portrait") {
-          exec(`startx ${electronPath} ${browserjsPath} ${config.url} ${portraitArguments}`, 
-            { cwd: __dirname });
+          childProcess.spawn("startx", 
+            [electronPath, browserjsPath, config.url, portraitArguments], 
+            { 
+              cwd: __dirname,
+              detached: true,
+              stdio: "inherit"
+            });
         } else {
-          exec(`startx ${electronPath} ${browserjsPath} ${config.url}`, { cwd: __dirname });
+          childProcess.spawn("startx", 
+            [electronPath, browserjsPath, config.url], 
+            { 
+              cwd: __dirname,
+              detached: true,
+              stdio: "inherit"
+            });
         }
       }
     }
