@@ -80,27 +80,31 @@ async function main() {
     let sourceConfig = JSON.parse(await fsPromises.readFile("../config/cls.json", "utf-8"));
     if (mac) {
       let config = sourceConfig[mac];
-      if (config.mode === "browser") {
-        let electronPath = `${__dirname}/node_modules/electron/dist/electron`;
-        let browserjsPath = `${__dirname}/browser.js`;
-        let portraitArguments = "-- -config /etc/X11/rpi.conf";
-        if (config.orientation === "portrait") {
-          childProcess.spawn("startx", 
-            [electronPath, browserjsPath, config.url, portraitArguments], 
-            { 
-              cwd: __dirname,
-              detached: true,
-              stdio: "inherit"
-            });
-        } else {
-          childProcess.spawn("startx", 
-            [electronPath, browserjsPath, config.url], 
-            { 
-              cwd: __dirname,
-              detached: true,
-              stdio: "inherit"
-            });
+      if (config) {
+        if (config.mode === "browser") {
+          let electronPath = `${__dirname}/node_modules/electron/dist/electron`;
+          let browserjsPath = `${__dirname}/browser.js`;
+          let portraitArguments = "-- -config /etc/X11/rpi.conf";
+          if (config.orientation === "portrait") {
+            childProcess.spawn("startx", 
+              [electronPath, browserjsPath, config.url, portraitArguments], 
+              { 
+                cwd: __dirname,
+                detached: true,
+                stdio: "inherit"
+              });
+          } else {
+            childProcess.spawn("startx", 
+              [electronPath, browserjsPath, config.url], 
+              { 
+                cwd: __dirname,
+                detached: true,
+                stdio: "inherit"
+              });
+          }
         }
+      } else {
+        log(`Failed to find config for ${mac}.`);
       }
     }
   }
