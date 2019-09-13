@@ -90,7 +90,6 @@ async function main() {
               [electronPath, browserjsPath, config.url, portraitArguments], 
               { 
                 cwd: __dirname,
-                detached: true,
                 stdio: "inherit"
               });
           } else {
@@ -98,7 +97,6 @@ async function main() {
               [electronPath, browserjsPath, config.url], 
               { 
                 cwd: __dirname,
-                detached: true,
                 stdio: "inherit"
               });
           }
