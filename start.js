@@ -87,14 +87,14 @@ async function main() {
           let portraitArguments = "-- -config /etc/X11/rpi.conf";
           if (config.orientation === "portrait") {
             childProcess.spawn("startx", 
-              [electronPath, browserjsPath, config.url, portraitArguments], 
+              [electronPath, browserjsPath, config.url, "1080", "1920", portraitArguments], 
               { 
                 cwd: __dirname,
                 stdio: "inherit"
               });
           } else {
             childProcess.spawn("startx", 
-              [electronPath, browserjsPath, config.url], 
+              [electronPath, browserjsPath, "1920", "1080", config.url], 
               { 
                 cwd: __dirname,
                 stdio: "inherit"
