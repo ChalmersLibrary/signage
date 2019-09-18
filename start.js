@@ -85,21 +85,16 @@ async function main() {
           let electronPath = `${__dirname}/node_modules/electron/dist/electron`;
           let browserjsPath = `${__dirname}/browser.js`;
           let portraitArguments = "-- -config /etc/X11/rpi.conf";
+          let args = [electronPath, browserjsPath, config.url];
           if (config.orientation === "portrait") {
-            childProcess.spawn("startx", 
-              [electronPath, browserjsPath, config.url, "1080", "1920", portraitArguments], 
-              { 
-                cwd: __dirname,
-                stdio: "inherit"
-              });
+            args.push("1080");
+            args.push("1920");
+            args.push(portraitArguments);
           } else {
-            childProcess.spawn("startx", 
-              [electronPath, browserjsPath, "1920", "1080", config.url], 
-              { 
-                cwd: __dirname,
-                stdio: "inherit"
-              });
+            args.push("1920");
+            args.push("1080");
           }
+          childProcess.spawn("startx", args, { cwd: __dirname, stdio: "inherit" });
         }
       } else {
         log(`Failed to find config for ${mac}.`);
