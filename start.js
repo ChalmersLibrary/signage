@@ -94,6 +94,7 @@ async function main() {
             args.push("1920");
             args.push("1080");
           }
+          args.push("-s 0");
           childProcess.spawn("startx", args, { cwd: __dirname, stdio: "inherit" });
         }
       } else {
