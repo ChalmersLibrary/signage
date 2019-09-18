@@ -84,17 +84,20 @@ async function main() {
         if (config.mode === "browser") {
           let electronPath = `${__dirname}/node_modules/electron/dist/electron`;
           let browserjsPath = `${__dirname}/browser.js`;
-          let portraitArguments = "-- -config /etc/X11/rpi.conf";
+          let portraitArguments = "-config /etc/X11/rpi.conf";
           let args = [electronPath, browserjsPath, config.url];
           if (config.orientation === "portrait") {
             args.push("1080");
             args.push("1920");
+            args.push("--");
             args.push(portraitArguments);
           } else {
             args.push("1920");
             args.push("1080");
+            args.push("--");
           }
           args.push("-s 0");
+          args.push("-nocursor");
           childProcess.spawn("startx", args, { cwd: __dirname, stdio: "inherit" });
         }
       } else {
