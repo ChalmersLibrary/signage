@@ -114,8 +114,6 @@ async function restart() {
   setTimeout(() => {
     process.on("exit", () => {
       childProcess.spawn(process.argv.shift(), process.argv, {
-        cwd: process.cwd(),
-        detached: true,
         stdio: "inherit"
       });
     });
