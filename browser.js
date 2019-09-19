@@ -1,3 +1,5 @@
+const REFRESH_INTERVAL = 15 * 60 * 1000;
+
 const { app, BrowserWindow } = require("electron");
 
 if (process.argv.length > 2) {
@@ -15,6 +17,8 @@ if (process.argv.length > 2) {
     });
 
     win.loadURL(url);
+
+    setInterval(() => win.reload(), REFRESH_INTERVAL);
   }
 
   app.on("ready", createWindow);
