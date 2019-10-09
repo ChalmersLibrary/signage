@@ -87,7 +87,7 @@ async function main() {
       if (mac) {
         let config = sourceConfig[mac];
         if (config) {
-          let newConfigHash = crypto.createHash("md5").update(config).digest("hex");
+          let newConfigHash = crypto.createHash("md5").update(JSON.stringify(config)).digest("hex");
           if (!configHash || newConfigHash !== configHash) {
             configHash = newConfigHash;
 
@@ -129,7 +129,7 @@ main().catch(e => log(`Encountered error: ${e}`));
 
 async function kill(processes) {
   processes.forEach(process => {
-    childProcess.spawn("kill", ["-9", process.pid]);
+    childProcess.spawn("kill", ["-9", process.pid, { cwd: __dirname, stdio: "inherit" }]);
   });
 }
 
