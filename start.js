@@ -6,6 +6,7 @@ const fsPromises = require("fs").promises;
 const util = require("util");
 const childProcess = require("child_process");
 const exec = util.promisify(childProcess.exec);
+const crypto = require("crypto");
 
 /**
  * Signage startup script
@@ -16,6 +17,8 @@ const exec = util.promisify(childProcess.exec);
 
 async function main() {
   let exit = false;
+  let configHash;
+  let startedProcesses = [];
   while (!exit) {
     // Make sure needed folders and stuff exists.
     try {
@@ -49,6 +52,7 @@ async function main() {
       await fsPromises.writeFile("tmp/state.json", JSON.stringify(state));
       log("Got new software. Restarting...");
       exit = true;
+      await kill(startedProcesses);
     } else {
       // Get the mac address.
       let mac;
@@ -83,24 +87,32 @@ async function main() {
       if (mac) {
         let config = sourceConfig[mac];
         if (config) {
-          if (config.mode === "browser") {
-            let electronPath = `${__dirname}/node_modules/electron/dist/electron`;
-            let browserjsPath = `${__dirname}/browser.js`;
-            let portraitArguments = "-config /etc/X11/rpi.conf";
-            let args = [electronPath, browserjsPath, config.url];
-            if (config.orientation === "portrait") {
-              args.push("1080");
-              args.push("1920");
-              args.push("--");
-              args.push(portraitArguments);
-            } else {
-              args.push("1920");
-              args.push("1080");
-              args.push("--");
+          let newConfigHash = crypto.createHash("md5").update(config).digest("hex");
+          if (!configHash || newConfigHash !== configHash) {
+            configHash = newConfigHash;
+
+            await kill(startedProcesses);
+
+            if (config.mode === "browser") {
+              let electronPath = `${__dirname}/node_modules/electron/dist/electron`;
+              let browserjsPath = `${__dirname}/browser.js`;
+              let portraitArguments = "-config /etc/X11/rpi.conf";
+              let args = [electronPath, browserjsPath, config.url];
+              if (config.orientation === "portrait") {
+                args.push("1080");
+                args.push("1920");
+                args.push("--");
+                args.push(portraitArguments);
+              } else {
+                args.push("1920");
+                args.push("1080");
+                args.push("--");
+              }
+              args.push("-s 0");
+              args.push("-nocursor");
+              let process = childProcess.spawn("startx", args, { cwd: __dirname, stdio: "inherit" });
+              startedProcesses.push(process);
             }
-            args.push("-s 0");
-            args.push("-nocursor");
-            childProcess.spawn("startx", args, { cwd: __dirname, stdio: "inherit" });
           }
         } else {
           log(`Failed to find config for ${mac}.`);
@@ -115,6 +127,11 @@ async function main() {
 main().catch(e => log(`Encountered error: ${e}`));
 
 
+async function kill(processes) {
+  processes.forEach(process => {
+    childProcess.spawn("kill", ["-9", process.pid]);
+  });
+}
 
 async function getLatestHash(workingDir) {
   const { stdout, stderr } = await exec("git rev-parse HEAD", { cwd: workingDir });
