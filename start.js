@@ -53,6 +53,7 @@ async function main() {
       log("Got new software. Restarting...");
       exit = true;
       await kill(startedProcesses);
+      startedProcesses = [];
     } else {
       // Get the mac address.
       let mac;
@@ -92,6 +93,7 @@ async function main() {
             configHash = newConfigHash;
 
             await kill(startedProcesses);
+            startedProcesses = [];
 
             if (config.mode === "browser") {
               let electronPath = `${__dirname}/node_modules/electron/dist/electron`;
