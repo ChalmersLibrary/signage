@@ -15,6 +15,23 @@ const crypto = require("crypto");
  * updating of software and configuration files.
  */
 
+// Load dev config if suitable.
+let debugConfig;
+try {
+  let config = require("./config.json");
+  for (var prop in config) {
+    if (config.hasOwnProperty(prop)) {
+      if (prop === "CONFIG") {
+        debugConfig = config[prop];
+      } else {
+        process.env[prop] = config[prop];
+      }
+    }
+  }
+} catch (err) {
+  console.error("No local config present.");
+}
+
 async function main() {
   let exit = false;
   let configHash;
@@ -44,10 +61,13 @@ async function main() {
       }
     }
 
-    // Check for new software versions.
-    await gitPull(__dirname);
-    let latestSoftwareGitHash = await getLatestHash(__dirname);
-    if (state.softwareGitHash !== latestSoftwareGitHash) {
+    let latestSoftwareGitHash = "";
+    if (!process.env.DEBUG) {
+      // Check for new software versions.
+      await gitPull(__dirname);
+      latestSoftwareGitHash = await getLatestHash(__dirname);
+    }
+    if (!process.env.debug && state.softwareGitHash !== latestSoftwareGitHash) {
       state.softwareGitHash = latestSoftwareGitHash;
       await fsPromises.writeFile("tmp/state.json", JSON.stringify(state));
       log("Got new software. Restarting...");
@@ -57,42 +77,59 @@ async function main() {
     } else {
       // Get the mac address.
       let mac;
-      let networkInterfaces = os.networkInterfaces();
-      if (networkInterfaces["eth0"]) {
-        let networkInterface = networkInterfaces["eth0"];
-        let macs = networkInterface
-          .filter(x => x.family.toLowerCase() === "ipv4")
-          .map(x => x.mac);
-        if (macs.length >= 1) {
-          mac = macs[0];
-          if (macs.length > 1) {
-            log("Something is very wrong. Got multiple ipv4 mac addresses.");
+      if (!process.env.DEBUG) {
+        let networkInterfaces = os.networkInterfaces();
+        if (networkInterfaces["eth0"]) {
+          let networkInterface = networkInterfaces["eth0"];
+          let macs = networkInterface
+            .filter(x => x.family.toLowerCase() === "ipv4")
+            .map(x => x.mac);
+          if (macs.length >= 1) {
+            mac = macs[0];
+            if (macs.length > 1) {
+              log("Something is very wrong. Got multiple ipv4 mac addresses.");
+            }
+          } else {
+            log("Couldn't find mac address.");
           }
         } else {
-          log("Couldn't find mac address.");
+          log("Couldn't find eth0.");
         }
       } else {
-        log("Couldn't find eth0.");
+        mac = "FAKE MAC FOR DEBUGGING";
       }
 
       // Check for new configurations.
-      await gitPull(`${__dirname}/../config/`);
-      let latestConfigGitHash = await getLatestHash(`${__dirname}/../config/`);
+      let latestConfigGitHash = "";
+      if (!process.env.DEBUG) {
+        await gitPull(`${__dirname}/../config/`);
+        latestConfigGitHash = await getLatestHash(`${__dirname}/../config/`);
+      }
       if (state.configGitHash !== latestConfigGitHash) {
         state.configGitHash = latestConfigGitHash;
         await fsPromises.writeFile("tmp/state.json", JSON.stringify(state));
       }
 
       // Parse current configuration and start application.
-      let sourceConfig = JSON.parse(await fsPromises.readFile("../config/cls.json", "utf-8"));
+      let sourceConfig;
+      if (!process.env.DEBUG) {
+        sourceConfig = JSON.parse(await fsPromises.readFile("../config/cls.json", "utf-8"));
+      }
       if (mac) {
-        let config = sourceConfig[mac];
+        let config;
+        if (debugConfig) {
+          config = debugConfig;
+        } else {
+          config = sourceConfig[mac];
+        }
         if (config) {
           let newConfigHash = crypto.createHash("md5").update(JSON.stringify(config)).digest("hex");
           if (!configHash || newConfigHash !== configHash) {
             configHash = newConfigHash;
 
-            await kill(startedProcesses);
+            if (!process.env.DEBUG) {
+              await kill(startedProcesses);
+            }
             startedProcesses = [];
 
             if (config.mode === "browser") {
@@ -113,6 +150,14 @@ async function main() {
               args.push("-s 0");
               args.push("-nocursor");
               let process = childProcess.spawn("startx", args, { cwd: __dirname, stdio: "inherit" });
+              startedProcesses.push(process);
+            } else if (config.mode === "video") {
+              let urls = config.url;
+              let videoUrls = [];
+              if (!Array.isArray(urls)) {
+                urls = [ urls ];
+              }
+              let process = childProcess.spawn("video.js", urls, { cwd: __dirname, stdio: "inherit" });
               startedProcesses.push(process);
             }
           }

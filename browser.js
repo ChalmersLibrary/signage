@@ -23,5 +23,5 @@ if (process.argv.length > 2) {
 
   app.on("ready", createWindow);
 } else {
-  console.error("No url passed.");
+  console.error("No url submitted.");
 }
