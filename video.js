@@ -26,7 +26,7 @@ async function main() {
     while (true) {
       await exec("omxplayer " + videoUrls[videoIndex]);
       videoIndex += 1;
-      if (videoIndex > videoUrls.length) {
+      if (videoIndex >= videoUrls.length) {
         videoIndex = 0;
       }
     }
