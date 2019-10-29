@@ -155,9 +155,9 @@ async function main() {
               let urls = config.url;
               let videoUrls = [];
               if (!Array.isArray(urls)) {
-                urls = [ urls ];
+                urls = [ "video.js" ].concat(urls);
               }
-              let process = childProcess.spawn("video.js", urls, { cwd: __dirname, stdio: "inherit" });
+              let process = childProcess.spawn("node", urls, { cwd: __dirname, stdio: "inherit" });
               startedProcesses.push(process);
             }
           }
