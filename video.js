@@ -6,7 +6,6 @@ const xmlParser = require("fast-xml-parser");
 
 async function main() {
   let videoUrls = [];
-  process.argv = [ "asd", "asd", "https://play.chalmers.se/media/erccomics-cellslife-ch1/0_7myl5ba6" ]
   if (process.argv.length > 2) {
     for (var i=2; i<process.argv.length; i++) {
       let url = process.argv[i];
