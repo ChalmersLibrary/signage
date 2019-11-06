@@ -176,7 +176,11 @@ main().catch(e => log(`Encountered error: ${e}`));
 
 async function kill(processes) {
   processes.forEach(process => {
-    childProcess.spawn("kill", ["-9", process.pid, { cwd: __dirname, stdio: "inherit" }]);
+    try {
+      process.kill();
+    } catch (error) {
+      log(`Failed to kill process: ${error}`);
+    }
   });
 }
 
