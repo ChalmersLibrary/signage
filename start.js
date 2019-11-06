@@ -125,6 +125,7 @@ async function main() {
         if (config) {
           let newConfigHash = crypto.createHash("md5").update(JSON.stringify(config)).digest("hex");
           if (!configHash || newConfigHash !== configHash) {
+            log(`Got new configuration. Killing old program (${config.mode}) and starting new (${config.mode}).`);
             configHash = newConfigHash;
 
             if (!process.env.DEBUG) {
