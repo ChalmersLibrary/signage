@@ -1,0 +1,20 @@
+        ,----,                                        
+      ,/   .`|  ,----..                    ,----..    
+    ,`   .'  : /   /   \      ,---,       /   /   \   
+  ;    ;     //   .     :   .'  .' `\    /   .     :  
+.'___,/    ,'.   /   ;.  \,---.'     \  .   /   ;.  \ 
+|    :     |.   ;   /  ` ;|   |  .`\  |.   ;   /  ` ; 
+;    |.';  ;;   |  ; \ ; |:   : |  '  |;   |  ; \ ; | 
+`----'  |  ||   :  | ; | '|   ' '  ;  :|   :  | ; | ' 
+    '   :  ;.   |  ' ' ' :'   | ;  .  |.   |  ' ' ' : 
+    |   |  ''   ;  \; /  ||   | :  |  ''   ;  \; /  | 
+    '   :  | \   \  ',  / '   : | /  ;  \   \  ',  /  
+    ;   |.'   ;   :    /  |   | '` ,/    ;   :    /   
+    '---'      \   \ .'   ;   :  .'       \   \ .'    
+                `---`     |   ,.'          `---`      
+                          '---'                       
+- Utforska idéer för att underlätta utveckling och felsökning.
+- Bugg: Lyckas inte alltid döda tidigare processer.
+- Bugg: Får fel konfigurationsfil ibland.
+- Ingen terminal som syns mellan filmer.
+- Lägg till flagga för att starta filmer mutade.
